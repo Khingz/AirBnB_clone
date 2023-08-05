@@ -17,12 +17,17 @@ class BaseModel:
 
     def __str__(self):
         """Return string representation of class"""
-        return ("{}, {}".format(self.updated_at, self.id))
-    
+        return ("[{}] ({}) {}".format(self.__class__.__name__, self.id, self.__dict__))
+
     def save(self):
         """Updates the updated_at attribute to current time"""
         self.updated_at = datetime.datetime.now()
 
     def to_dict(self):
         """Print dictionary representation of class attriutes and method"""
-        pass
+        my_dict = self.__dict__
+        my_dict['updated_at'] = my_dict['updated_at'].isoformat()
+        my_dict['created_at'] = my_dict['created_at'].isoformat()
+        my_dict['__class__'] = self.__class__.__name__
+        return my_dict
+    
