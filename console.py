@@ -28,8 +28,8 @@ class  HBNBCommand(cmd.Cmd):
         print(errors.get(error_type, "Error: Unknown error"))
 
     def do_create(self, cmmd):
-        """
-        creates a class instance
+        """Creates a class instance
+        Usage: create <class>
         """
         if not cmmd:
             self.error_helper("missing_class")
@@ -37,13 +37,12 @@ class  HBNBCommand(cmd.Cmd):
             self.error_helper('invalid_class')
         else:
             instance = (self.class_mapping)[cmmd]()
-            instance.save()
             print(instance.id)
+            instance.save()
 
-    def do_show(self, cmmd):
-        """
-        Prints the string representation of an instance 
-        based on the class name and id
+    def do_show(self, cmmd):  
+        """Print str rep of instance based on the class name and id
+        Usage show <class> <id>
         """
         if not cmmd:
             return self.error_helper("missing_class")
@@ -55,16 +54,40 @@ class  HBNBCommand(cmd.Cmd):
             id = args[1]
             if cls not in self.class_mapping:
                 return self.error_helper('invalid_class')
-            store = storage.__dict__
-            for item in store.values():
-                for inst in item:
-                    data = item[inst]
-                    if data['__class__'] == cls and data['id'] == id:
-                        return print(self.class_mapping[cls](data))
-                    return self.error_helper('no_instance')
+            store = storage.all()
+            for item_dict in store.values():
+                if item_dict['__class__'] == cls and item_dict['id'] == id:
+                    item_obj = self.class_mapping[cls](**item_dict)
+                    print(str(item_obj))
+                    return
+            return self.error_helper('no_instance')
         else:
             pass
 
+    def do_destroy(self, cmmd):
+        """Deletes instance based on the class name and id
+        Usage: destroy <class> <id>
+        """
+        if not cmmd:
+            return self.error_helper("missing_class")
+        args = cmmd.split(" ")
+        if len(args) == 1:
+            return self.error_helper('missing_id')
+        if len(args) == 2:
+            cls = args[0]
+            id = args[1]
+            if cls not in self.class_mapping:
+                return self.error_helper('invalid_class')
+            store = storage.all()
+            for item_key in list(store.keys()):
+                k, _id = item_key.split(".")
+                if k == cls and _id == id:
+                    del store["{}.{}".format(cls, id)]
+                    storage.save()
+                    return
+            return self.error_helper('no_instance')
+        else:
+            pass
 
     def do_EOF(self, line):
         """
@@ -73,8 +96,8 @@ class  HBNBCommand(cmd.Cmd):
         return True
     
     def do_quit(self, args):
-        """
-        Quits command to exit the program
+        """Quits command to exit the program
+        Usage: Quit
         """
         return True
     
