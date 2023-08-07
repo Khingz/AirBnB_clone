@@ -23,7 +23,9 @@ class  HBNBCommand(cmd.Cmd):
             "missing_class": "** class name missing **",
             "invalid_class": "** class doesn't exist **",
             "missing_id": "** instance id missing **",
-            "no_instance": "** no instance found **"
+            "no_instance": "** no instance found **",
+            "missing_attr": "** attribute name missing **",
+            "missing_val": "** value missing **"
         }
         print(errors.get(error_type, "Error: Unknown error"))
 
@@ -111,6 +113,35 @@ class  HBNBCommand(cmd.Cmd):
                 item_obj = self.class_mapping[cls](**item_dict)
                 obj_list.append(str(item_obj))
         print(obj_list)
+
+    def do_update(self, cmmd):
+        """Updates an instance based on the class name and id
+        Usage: update <class> <id> <attr name> "<attr value>"
+        """
+        store = storage.all()
+        if not cmmd:
+            return self.error_helper("missing_class")
+        args = cmmd.split(" ")
+        cls = args[0]
+        if args[0] not in self.class_mapping:
+            return self.error_helper('invalid_class')
+        if len(args) == 1:
+            return self.error_helper('missing_id')
+        if len(args) == 2:
+            return self.error_helper('missing_attr')
+        if len(args) == 3:
+            return self.error_helper('missing_val')
+        for item_dict in store.values():
+            if item_dict['__class__'] == cls and item_dict['id'] == args[1]:
+                banned = ["id", "created_at", "updated_at"]
+                if args[2] not in banned:
+                    val = args[3].strip().strip('"').strip("'")
+                    item_dict[args[2]] = val
+                    storage.save()
+                    print(storage.all())
+                return
+        return self.error_helper('no_instance')
+        
             
 
     def do_EOF(self):
