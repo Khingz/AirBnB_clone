@@ -5,6 +5,7 @@ Console for airnb clone console
 
 import cmd
 from models.base_model import BaseModel
+from models.user import User
 from models import storage
 import re
 
@@ -15,7 +16,8 @@ class  HBNBCommand(cmd.Cmd):
     prompt = '(hbnb) '
 
     class_mapping = {
-        'BaseModel': BaseModel
+        'BaseModel': BaseModel,
+        'User': User
     }
 
     def error_helper(self, error_type):
