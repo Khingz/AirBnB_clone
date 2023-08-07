@@ -144,19 +144,19 @@ class  HBNBCommand(cmd.Cmd):
         
             
 
-    def do_EOF(self):
+    def do_EOF(self, line):
         """
         Handles end of file or quit
         """
         return True
     
-    def do_quit(self):
+    def do_quit(self, line):
         """Quits command to exit the program
         Usage: Quit
         """
         return True
     
-    def emptyline(self):
+    def emptyline(self, line):
         """Do nothing on empty input line"""
         pass
 
