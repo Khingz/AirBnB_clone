@@ -36,7 +36,7 @@ class BaseModel:
 
     def to_dict(self):
         """Print dictionary representation of class attriutes and method"""
-        my_dict = self.__dict__
+        my_dict = self.__dict__.copy()
         if isinstance(my_dict['updated_at'], datetime.datetime):
             my_dict['updated_at'] = my_dict['updated_at'].isoformat()
         if isinstance(my_dict['created_at'], datetime.datetime):
