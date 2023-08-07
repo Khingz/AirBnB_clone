@@ -6,6 +6,7 @@ Console for airnb clone console
 import cmd
 from models.base_model import BaseModel
 from models import storage
+import re
 
 class  HBNBCommand(cmd.Cmd):
     """
@@ -121,7 +122,7 @@ class  HBNBCommand(cmd.Cmd):
         store = storage.all()
         if not cmmd:
             return self.error_helper("missing_class")
-        args = cmmd.split(" ")
+        args = re.findall(r'(?:[^\s,"]|"(?:\\.|[^"])*")+', cmmd)
         cls = args[0]
         if args[0] not in self.class_mapping:
             return self.error_helper('invalid_class')
@@ -138,7 +139,6 @@ class  HBNBCommand(cmd.Cmd):
                     val = args[3].strip().strip('"').strip("'")
                     item_dict[args[2]] = val
                     storage.save()
-                    print(storage.all())
                 return
         return self.error_helper('no_instance')
         
