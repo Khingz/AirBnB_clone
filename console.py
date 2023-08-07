@@ -89,13 +89,37 @@ class  HBNBCommand(cmd.Cmd):
         else:
             pass
 
-    def do_EOF(self, line):
+    def do_all(self, cmmd):
+        """Print all str rep of instance based or not on class name.
+        Usage: all or all <class>
+        """
+        obj_list = []
+        store = storage.all()
+        if cmmd:
+            args = cmmd.split(" ")
+            if len(args) == 1:
+                if args[0] not in self.class_mapping:
+                    return self.error_helper('invalid_class')
+                for item_dict in store.values():
+                    if item_dict['__class__'] == args[0]:
+                        cls = item_dict['__class__']
+                        item_obj = self.class_mapping[cls](**item_dict)
+                        obj_list.append(str(item_obj))
+        else:
+            for item_dict in store.values():
+                cls = item_dict['__class__']
+                item_obj = self.class_mapping[cls](**item_dict)
+                obj_list.append(str(item_obj))
+        print(obj_list)
+            
+
+    def do_EOF(self):
         """
         Handles end of file or quit
         """
         return True
     
-    def do_quit(self, args):
+    def do_quit(self):
         """Quits command to exit the program
         Usage: Quit
         """
