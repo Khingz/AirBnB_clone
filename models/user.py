@@ -7,10 +7,7 @@ class User(BaseModel):
     """
     Class that defines the User
     """
-    def __init__(self, *args, **kwargs):
-        """Init function for user class"""
-        super().__init__(*args, **kwargs)
-        self.email = ""
-        self.password = ""
-        self.first_name = ""
-        self.last_name = ""
+    email = ""
+    password = ""
+    first_name = ""
+    last_name = ""

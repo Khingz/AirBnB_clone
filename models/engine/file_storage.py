@@ -53,13 +53,9 @@ class FileStorage():
             path = FileStorage.__file_path
             store = FileStorage.__objects
             with open(path, 'r') as f:
-                js = f.read()
-                if js:
-                    loaded_ob = json.loads(js)
-                    for k, v in loaded_ob.items():
-                        cls = v['__class__']
-                        store[k] = __classes[cls](**v)
-                else:
-                    return
+                loaded_ob = json.load(f)
+                for k, v in loaded_ob.items():
+                    cls = v['__class__']
+                    store[k] = __classes[cls](**v)
         except FileNotFoundError:
             pass
