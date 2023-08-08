@@ -4,6 +4,8 @@ A file that contains the class for filestorage
 """
 
 import json
+from models.base_model import BaseModel
+from models.user import User
 
 class FileStorage():
     """
@@ -27,27 +29,38 @@ class FileStorage():
         """
         if obj:
             key = "{}.{}".format(obj.__class__.__name__, obj.id)
-            self.__objects[key] = obj.to_dict()
-            print('save', obj.to_dict())
+            FileStorage.__objects[key] = obj
 
     def save(self):
         """
         serializes object to json file
         """
         with open(self.__file_path, 'w') as f:
-            js = json.dumps(self.__objects)
-            f.write(js)
+            store = FileStorage.__objects
+            de_ob = {k: v.to_dict() for k, v in store.items()}
+            json.dump(de_ob, f)
 
     def reload(self):
         """
         deserializes json file to object
         """
+        __classes = {
+            "BaseModel": BaseModel,
+            "User": User
+        }
+
         try:
-            with open(self.__file_path, 'r') as f:
+            path = FileStorage.__file_path
+            store = FileStorage.__objects
+            with open(path, 'r') as f:
                 js = f.read()
                 if js:
-                    self.__objects = json.loads(js)
+                    loaded_ob = json.loads(js)
+                    print('loaded', loaded_ob)
+                    for k, v in loaded_ob.items():
+                        cls = v['__class__']
+                        store[k] = __classes[cls](**v)
                 else:
-                    self.__objects = {}
+                    return
         except FileNotFoundError:
             pass

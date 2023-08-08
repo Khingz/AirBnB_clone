@@ -4,7 +4,7 @@ A module that contains class that act as BaseModel
 """
 import uuid
 import datetime
-from models import storage
+import models
 
 class BaseModel:
     """
@@ -22,7 +22,7 @@ class BaseModel:
             self.id = str(uuid.uuid4())
             self.created_at = datetime.datetime.now()
             self.updated_at = datetime.datetime.now()
-            storage.new(self)
+            models.storage.new(self)
 
     def __str__(self):
         """Return string representation of class"""
@@ -32,7 +32,7 @@ class BaseModel:
         """Updates the updated_at attribute to current time"""
         self.updated_at = datetime.datetime.now()
         self.updated_at = self.updated_at.isoformat()
-        storage.save()
+        models.storage.save()
 
     def to_dict(self):
         """Print dictionary representation of class attriutes and method"""
@@ -42,4 +42,4 @@ class BaseModel:
         if isinstance(obj['created_at'], datetime.datetime):
             obj['created_at'] = obj['created_at'].isoformat()
         obj['__class__'] = self.__class__.__name__
-        return {k: v for k, v in obj.items() if v is not None and v != ""}
+        return obj

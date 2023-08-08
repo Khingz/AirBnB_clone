@@ -2,7 +2,6 @@
 """A file that houses the User class"""
 
 from models.base_model import BaseModel
-from models import storage
 
 class User(BaseModel):
     """
@@ -15,4 +14,3 @@ class User(BaseModel):
         self.password = ""
         self.first_name = ""
         self.last_name = ""
-        storage.new(self)
