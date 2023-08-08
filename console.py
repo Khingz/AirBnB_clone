@@ -37,13 +37,15 @@ class  HBNBCommand(cmd.Cmd):
         Usage: create <class>
         """
         if not cmmd:
-            self.error_helper("missing_class")
-        elif cmmd not in self.class_mapping:
-            self.error_helper('invalid_class')
-        else:
-            instance = (self.class_mapping)[cmmd]()
-            print(instance.id)
-            instance.save()
+            return self.error_helper("missing_class")
+        args = cmmd.split(" ")
+        if args[0] not in self.class_mapping:
+            return self.error_helper('invalid_class')
+        instance = (self.class_mapping)[args[0]]()
+        print(instance.id)
+        instance.save()
+        
+        
 
     def do_show(self, cmmd):  
         """Print str rep of instance based on the class name and id
@@ -55,19 +57,16 @@ class  HBNBCommand(cmd.Cmd):
         if len(args) == 1:
             return self.error_helper('missing_id')
         if len(args) == 2:
-            cls = args[0]
-            id = args[1]
-            if cls not in self.class_mapping:
+            if args[0] not in self.class_mapping:
                 return self.error_helper('invalid_class')
             store = storage.all()
-            for item_dict in store.values():
-                if item_dict['__class__'] == cls and item_dict['id'] == id:
-                    item_obj = self.class_mapping[cls](**item_dict)
-                    print(str(item_obj))
-                    return
-            return self.error_helper('no_instance')
+            key = "{}.{}".format(args[0], args[1])
+            val = store.get(key)
+            if val is None:
+                return self.error_helper('no_instance')
+            print(val)        
         else:
-            pass
+            return
 
     def do_destroy(self, cmmd):
         """Deletes instance based on the class name and id
@@ -79,20 +78,17 @@ class  HBNBCommand(cmd.Cmd):
         if len(args) == 1:
             return self.error_helper('missing_id')
         if len(args) == 2:
-            cls = args[0]
-            id = args[1]
-            if cls not in self.class_mapping:
+            if args[0] not in self.class_mapping:
                 return self.error_helper('invalid_class')
             store = storage.all()
-            for item_key in list(store.keys()):
-                k, _id = item_key.split(".")
-                if k == cls and _id == id:
-                    del store["{}.{}".format(cls, id)]
-                    storage.save()
-                    return
-            return self.error_helper('no_instance')
+            key = "{}.{}".format(args[0], args[1])
+            val = store.get(key)
+            if val is None:
+                return self.error_helper('no_instance')
+            del store[key]
+            storage.save()
         else:
-            pass
+            return
 
     def do_all(self, cmmd):
         """Print all str rep of instance based or not on class name.
@@ -105,15 +101,11 @@ class  HBNBCommand(cmd.Cmd):
             if len(args) == 1:
                 if args[0] not in self.class_mapping:
                     return self.error_helper('invalid_class')
-                for item_dict in store.values():
-                    if item_dict['__class__'] == args[0]:
-                        cls = item_dict['__class__']
-                        item_obj = self.class_mapping[cls](**item_dict)
-                        obj_list.append(str(item_obj))
+                for k, v in store.items():
+                    if k.split('.')[0] == args[0]:
+                        obj_list.append(str(v))
         else:
-            for item_dict in store.values():
-                cls = item_dict['__class__']
-                item_obj = self.class_mapping[cls](**item_dict)
+            for item_obj in store.values():
                 obj_list.append(str(item_obj))
         print(obj_list)
 
@@ -125,7 +117,6 @@ class  HBNBCommand(cmd.Cmd):
         if not cmmd:
             return self.error_helper("missing_class")
         args = re.findall(r'(?:[^\s,"]|"(?:\\.|[^"])*")+', cmmd)
-        cls = args[0]
         if args[0] not in self.class_mapping:
             return self.error_helper('invalid_class')
         if len(args) == 1:
@@ -134,18 +125,16 @@ class  HBNBCommand(cmd.Cmd):
             return self.error_helper('missing_attr')
         if len(args) == 3:
             return self.error_helper('missing_val')
-        for item_dict in store.values():
-            if item_dict['__class__'] == cls and item_dict['id'] == args[1]:
-                banned = ["id", "created_at", "updated_at"]
-                if args[2] not in banned:
-                    val = args[3].strip().strip('"').strip("'")
-                    item_dict[args[2]] = val
-                    storage.save()
-                return
-        return self.error_helper('no_instance')
+        upd_key = "{}.{}".format(args[0], args[1])
+        upd_obj = store.get(upd_key)
+        if upd_obj is None:
+            return self.error_helper('no_instance')
+        banned = ["id", "created_at", "updated_at"]
+        if args[2] not in banned:
+            val = args[3].strip().strip('"').strip("'")
+            setattr(upd_obj, args[2], val)
+        storage.save()
         
-            
-
     def do_EOF(self, line):
         """
         Handles end of file or quit

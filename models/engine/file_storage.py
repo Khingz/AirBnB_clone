@@ -56,7 +56,6 @@ class FileStorage():
                 js = f.read()
                 if js:
                     loaded_ob = json.loads(js)
-                    print('loaded', loaded_ob)
                     for k, v in loaded_ob.items():
                         cls = v['__class__']
                         store[k] = __classes[cls](**v)
