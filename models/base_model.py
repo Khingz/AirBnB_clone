@@ -31,7 +31,6 @@ class BaseModel:
     def save(self):
         """Updates the updated_at attribute to current time"""
         self.updated_at = datetime.datetime.now()
-        self.updated_at = self.updated_at.isoformat()
         models.storage.save()
 
     def to_dict(self):
