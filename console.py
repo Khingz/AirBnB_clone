@@ -144,6 +144,10 @@ class  HBNBCommand(cmd.Cmd):
             val = args[3].strip().strip('"').strip("'")
             setattr(upd_obj, args[2], val)
         storage.save()
+
+    # def default(self, line):
+    #    return False
+            
         
     def do_EOF(self, line):
         """
@@ -157,7 +161,7 @@ class  HBNBCommand(cmd.Cmd):
         """
         return True
     
-    def emptyline(self, line):
+    def emptyline(self):
         """Do nothing on empty input line"""
         pass
 
