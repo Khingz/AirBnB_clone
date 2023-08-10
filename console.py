@@ -15,6 +15,9 @@ from models import storage
 import re
 
 def parse_helper(line):
+    """
+    Helper function that parse the command line passed
+    """
     param_s = re.search(r'\((.*?)\)', line).group(1)
     param_s = param_s.replace('"', '')
     param_s = param_s.replace("'", '')
@@ -62,7 +65,8 @@ class  HBNBCommand(cmd.Cmd):
            'all': self.do_all,
            'show': self.do_show,
            'destroy': self.do_destroy,
-           'update': self.do_update
+           'update': self.do_update,
+           'count': self.do_count
        }
        match = re.match(r"\w+\.\w+", line)
        if match:
@@ -178,6 +182,22 @@ class  HBNBCommand(cmd.Cmd):
             val = args[3].strip().strip('"').strip("'")
             setattr(upd_obj, args[2], val)
         storage.save()
+
+    def do_count(self, cmmd):
+        """Count the number of class instance present
+        Usage: count <class> or <class>.count()
+        """
+        count = 0
+        store = storage.all()
+        if cmmd:
+            args = cmmd.split(" ")
+            if len(args) == 1:
+                if args[0] not in self.class_mapping:
+                    return self.error_helper('invalid_class')
+                for k, v in store.items():
+                    if k.split('.')[0] == args[0]:
+                        count += 1
+        print(count)
         
     def do_EOF(self, line):
         """
