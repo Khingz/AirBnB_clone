@@ -93,8 +93,6 @@ class  HBNBCommand(cmd.Cmd):
         print(instance.id)
         instance.save()
         
-        
-
     def do_show(self, cmmd):  
         """Print str rep of instance based on the class name and id
         Usage show <class> <id>
@@ -102,11 +100,11 @@ class  HBNBCommand(cmd.Cmd):
         if not cmmd:
             return self.error_helper("missing_class")
         args = cmmd.split(" ")
+        if args[0] not in self.class_mapping:
+                return self.error_helper('invalid_class')
         if len(args) == 1:
             return self.error_helper('missing_id')
         if len(args) == 2:
-            if args[0] not in self.class_mapping:
-                return self.error_helper('invalid_class')
             store = storage.all()
             key = "{}.{}".format(args[0], args[1])
             val = store.get(key)
@@ -123,11 +121,11 @@ class  HBNBCommand(cmd.Cmd):
         if not cmmd:
             return self.error_helper("missing_class")
         args = cmmd.split(" ")
+        if args[0] not in self.class_mapping:
+                return self.error_helper('invalid_class')
         if len(args) == 1:
             return self.error_helper('missing_id')
         if len(args) == 2:
-            if args[0] not in self.class_mapping:
-                return self.error_helper('invalid_class')
             store = storage.all()
             key = "{}.{}".format(args[0], args[1])
             val = store.get(key)
@@ -169,17 +167,27 @@ class  HBNBCommand(cmd.Cmd):
             return self.error_helper('invalid_class')
         if len(args) == 1:
             return self.error_helper('missing_id')
-        if len(args) == 2:
-            return self.error_helper('missing_attr')
-        if len(args) == 3:
-            return self.error_helper('missing_val')
         upd_key = "{}.{}".format(args[0], args[1])
         upd_obj = store.get(upd_key)
         if upd_obj is None:
             return self.error_helper('no_instance')
+        if len(args) == 2:
+            return self.error_helper('missing_attr')
+        if len(args) == 3:
+            return self.error_helper('missing_val')
         banned = ["id", "created_at", "updated_at"]
         if args[2] not in banned:
             val = args[3].strip().strip('"').strip("'")
+            current_attr_type = getattr(upd_obj, args[2], None)
+            try:
+                if isinstance(current_attr_type, int):
+                    val = int(val)
+                elif isinstance(current_attr_type, float):
+                    val = float(val)
+                elif isinstance(current_attr_type, list):
+                    val = list(val)
+            except ValueError:
+                return self.error_helper('invalid_type_conversion')
             setattr(upd_obj, args[2], val)
         storage.save()
 
@@ -187,17 +195,15 @@ class  HBNBCommand(cmd.Cmd):
         """Count the number of class instance present
         Usage: count <class> or <class>.count()
         """
-        count = 0
         store = storage.all()
         if cmmd:
             args = cmmd.split(" ")
             if len(args) == 1:
-                if args[0] not in self.class_mapping:
-                    return self.error_helper('invalid_class')
-                for k, v in store.items():
+                count = 0
+                for k in store.keys():
                     if k.split('.')[0] == args[0]:
                         count += 1
-        print(count)
+                print(count)
         
     def do_EOF(self, line):
         """
@@ -215,8 +221,13 @@ class  HBNBCommand(cmd.Cmd):
         """Do nothing on empty input line"""
         pass
 
-if __name__ == '__main__':
-    try:       
-        HBNBCommand().cmdloop()
-    except KeyboardInterrupt:
-        pass
+    def cmdloop(self, intro=None):
+        while True:
+            try:
+                super(HBNBCommand, self).cmdloop(intro)
+                break
+            except KeyboardInterrupt:
+                return True
+            
+if __name__ == "__main__":
+    HBNBCommand().cmdloop()
