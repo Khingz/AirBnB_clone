@@ -14,6 +14,21 @@ from models.state import State
 from models import storage
 import re
 
+def parse_helper(line):
+    param_s = re.search(r'\((.*?)\)', line).group(1)
+    param_s = param_s.replace('"', '')
+    param_s = param_s.replace("'", '')
+    param_s = param_s.replace("{", '')
+    param_s = param_s.replace("}", '')
+    param = [arg.strip() for arg in param_s.split(',')]
+    parsed_l = []
+    for el in param:
+        if ":" in el:
+            parsed_l.extend(el.split(":"))
+        else:
+            parsed_l.append(el)
+    return(parsed_l)
+
 class  HBNBCommand(cmd.Cmd):
     """
     class definition for the console
@@ -51,22 +66,10 @@ class  HBNBCommand(cmd.Cmd):
        }
        match = re.match(r"\w+\.\w+", line)
        if match:
-           print(line)
            items = line.split('.')
            command = items[1].split('(')[0]
            if command in _class_mapping:
-               param_s = re.search(r'\((.*?)\)', line).group(1)
-               param_s = param_s.replace('"', '')
-               param_s = param_s.replace("'", '')
-               param_s = param_s.replace("{", '')
-               param_s = param_s.replace("}", '')
-               param = [arg.strip() for arg in param_s.split(',')]
-               parsed_l = []
-               for el in param:
-                   if ":" in el:
-                       parsed_l.extend(el.split(":"))
-                   else:
-                       parsed_l.append(el)
+               parsed_l = parse_helper(line)
                tmp_param = [items[0]] + parsed_l
                new_param = " ".join(x for x in tmp_param if x)
                return _class_mapping[command](new_param)
