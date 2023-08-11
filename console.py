@@ -14,6 +14,7 @@ from models.state import State
 from models import storage
 import re
 
+
 def parse_helper(line):
     """
     Helper function that parse the command line passed
@@ -30,9 +31,10 @@ def parse_helper(line):
             parsed_l.extend(el.split(":"))
         else:
             parsed_l.append(el)
-    return(parsed_l)
+    return (parsed_l)
 
-class  HBNBCommand(cmd.Cmd):
+
+class HBNBCommand(cmd.Cmd):
     """
     class definition for the console
     """
@@ -61,24 +63,24 @@ class  HBNBCommand(cmd.Cmd):
         print(errors.get(error_type, "Error: Unknown error"))
 
     def default(self, line):
-       _class_mapping = {
-           'all': self.do_all,
-           'show': self.do_show,
-           'destroy': self.do_destroy,
-           'update': self.do_update,
-           'count': self.do_count
-       }
-       match = re.match(r"\w+\.\w+", line)
-       if match:
-           items = line.split('.')
-           command = items[1].split('(')[0]
-           if command in _class_mapping:
-               parsed_l = parse_helper(line)
-               tmp_param = [items[0]] + parsed_l
-               new_param = " ".join(x for x in tmp_param if x)
-               return _class_mapping[command](new_param)
-       print("*** Unknown syntax: {}".format(line))
-       return False
+        _class_mapping = {
+            'all': self.do_all,
+            'show': self.do_show,
+            'destroy': self.do_destroy,
+            'update': self.do_update,
+            'count': self.do_count
+        }
+        match = re.match(r"\w+\.\w+", line)
+        if match:
+            items = line.split('.')
+            command = items[1].split('(')[0]
+            if command in _class_mapping:
+                parsed_l = parse_helper(line)
+                tmp_param = [items[0]] + parsed_l
+                new_param = " ".join(x for x in tmp_param if x)
+                return _class_mapping[command](new_param)
+        print("*** Unknown syntax: {}".format(line))
+        return False
 
     def do_create(self, cmmd):
         """Creates a class instance
@@ -92,8 +94,8 @@ class  HBNBCommand(cmd.Cmd):
         instance = (self.class_mapping)[args[0]]()
         print(instance.id)
         instance.save()
-        
-    def do_show(self, cmmd):  
+
+    def do_show(self, cmmd):
         """Print str rep of instance based on the class name and id
         Usage show <class> <id>
         """
@@ -101,7 +103,7 @@ class  HBNBCommand(cmd.Cmd):
             return self.error_helper("missing_class")
         args = cmmd.split(" ")
         if args[0] not in self.class_mapping:
-                return self.error_helper('invalid_class')
+            return self.error_helper('invalid_class')
         if len(args) == 1:
             return self.error_helper('missing_id')
         if len(args) == 2:
@@ -110,7 +112,7 @@ class  HBNBCommand(cmd.Cmd):
             val = store.get(key)
             if val is None:
                 return self.error_helper('no_instance')
-            print(val)        
+            print(val)
         else:
             return
 
@@ -122,7 +124,7 @@ class  HBNBCommand(cmd.Cmd):
             return self.error_helper("missing_class")
         args = cmmd.split(" ")
         if args[0] not in self.class_mapping:
-                return self.error_helper('invalid_class')
+            return self.error_helper('invalid_class')
         if len(args) == 1:
             return self.error_helper('missing_id')
         if len(args) == 2:
@@ -204,19 +206,19 @@ class  HBNBCommand(cmd.Cmd):
                     if k.split('.')[0] == args[0]:
                         count += 1
                 print(count)
-        
+
     def do_EOF(self, line):
         """
         Handles end of file or quit
         """
         return True
-    
+
     def do_quit(self, line):
         """Quits command to exit the program
         Usage: Quit
         """
         return True
-    
+
     def emptyline(self):
         """Do nothing on empty input line"""
         pass
@@ -228,6 +230,7 @@ class  HBNBCommand(cmd.Cmd):
                 break
             except KeyboardInterrupt:
                 return True
-            
+
+
 if __name__ == "__main__":
     HBNBCommand().cmdloop()
