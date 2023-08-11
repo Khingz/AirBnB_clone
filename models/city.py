@@ -3,6 +3,7 @@
 
 from models.base_model import BaseModel
 
+
 class City(BaseModel):
     """
     Class that defines the City
