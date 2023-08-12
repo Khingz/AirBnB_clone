@@ -6,6 +6,7 @@ import uuid
 import datetime
 import models
 
+
 class BaseModel:
     """
     A class that defines the basemodel
@@ -26,12 +27,12 @@ class BaseModel:
 
     def __str__(self):
         """Return string representation of class"""
-        return ("[{}] ({}) {}".format(self.__class__.__name__, self.id, self.__dict__))
+        cls = self.__class__.__name__
+        return ("[{}] ({}) {}".format(cls, self.id, self.__dict__))
 
     def save(self):
         """Updates the updated_at attribute to current time"""
         self.updated_at = datetime.datetime.now()
-        self.updated_at = self.updated_at.isoformat()
         models.storage.save()
 
     def to_dict(self):

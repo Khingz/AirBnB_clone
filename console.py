@@ -14,7 +14,27 @@ from models.state import State
 from models import storage
 import re
 
-class  HBNBCommand(cmd.Cmd):
+
+def parse_helper(line):
+    """
+    Helper function that parse the command line passed
+    """
+    param_s = re.search(r'\((.*?)\)', line).group(1)
+    param_s = param_s.replace('"', '')
+    param_s = param_s.replace("'", '')
+    param_s = param_s.replace("{", '')
+    param_s = param_s.replace("}", '')
+    param = [arg.strip() for arg in param_s.split(',')]
+    parsed_l = []
+    for el in param:
+        if ":" in el:
+            parsed_l.extend(el.split(":"))
+        else:
+            parsed_l.append(el)
+    return (parsed_l)
+
+
+class HBNBCommand(cmd.Cmd):
     """
     class definition for the console
     """
@@ -42,6 +62,26 @@ class  HBNBCommand(cmd.Cmd):
         }
         print(errors.get(error_type, "Error: Unknown error"))
 
+    def default(self, line):
+        _class_mapping = {
+            'all': self.do_all,
+            'show': self.do_show,
+            'destroy': self.do_destroy,
+            'update': self.do_update,
+            'count': self.do_count
+        }
+        match = re.match(r"\w+\.\w+", line)
+        if match:
+            items = line.split('.')
+            command = items[1].split('(')[0]
+            if command in _class_mapping:
+                parsed_l = parse_helper(line)
+                tmp_param = [items[0]] + parsed_l
+                new_param = " ".join(x for x in tmp_param if x)
+                return _class_mapping[command](new_param)
+        print("*** Unknown syntax: {}".format(line))
+        return False
+
     def do_create(self, cmmd):
         """Creates a class instance
         Usage: create <class>
@@ -54,27 +94,25 @@ class  HBNBCommand(cmd.Cmd):
         instance = (self.class_mapping)[args[0]]()
         print(instance.id)
         instance.save()
-        
-        
 
-    def do_show(self, cmmd):  
+    def do_show(self, cmmd):
         """Print str rep of instance based on the class name and id
         Usage show <class> <id>
         """
         if not cmmd:
             return self.error_helper("missing_class")
         args = cmmd.split(" ")
+        if args[0] not in self.class_mapping:
+            return self.error_helper('invalid_class')
         if len(args) == 1:
             return self.error_helper('missing_id')
         if len(args) == 2:
-            if args[0] not in self.class_mapping:
-                return self.error_helper('invalid_class')
             store = storage.all()
             key = "{}.{}".format(args[0], args[1])
             val = store.get(key)
             if val is None:
                 return self.error_helper('no_instance')
-            print(val)        
+            print(val)
         else:
             return
 
@@ -85,11 +123,11 @@ class  HBNBCommand(cmd.Cmd):
         if not cmmd:
             return self.error_helper("missing_class")
         args = cmmd.split(" ")
+        if args[0] not in self.class_mapping:
+            return self.error_helper('invalid_class')
         if len(args) == 1:
             return self.error_helper('missing_id')
         if len(args) == 2:
-            if args[0] not in self.class_mapping:
-                return self.error_helper('invalid_class')
             store = storage.all()
             key = "{}.{}".format(args[0], args[1])
             val = store.get(key)
@@ -131,38 +169,68 @@ class  HBNBCommand(cmd.Cmd):
             return self.error_helper('invalid_class')
         if len(args) == 1:
             return self.error_helper('missing_id')
-        if len(args) == 2:
-            return self.error_helper('missing_attr')
-        if len(args) == 3:
-            return self.error_helper('missing_val')
         upd_key = "{}.{}".format(args[0], args[1])
         upd_obj = store.get(upd_key)
         if upd_obj is None:
             return self.error_helper('no_instance')
+        if len(args) == 2:
+            return self.error_helper('missing_attr')
+        if len(args) == 3:
+            return self.error_helper('missing_val')
         banned = ["id", "created_at", "updated_at"]
         if args[2] not in banned:
             val = args[3].strip().strip('"').strip("'")
+            current_attr_type = getattr(upd_obj, args[2], None)
+            try:
+                if isinstance(current_attr_type, int):
+                    val = int(val)
+                elif isinstance(current_attr_type, float):
+                    val = float(val)
+                elif isinstance(current_attr_type, list):
+                    val = list(val)
+            except ValueError:
+                return self.error_helper('invalid_type_conversion')
             setattr(upd_obj, args[2], val)
         storage.save()
-        
+
+    def do_count(self, cmmd):
+        """Count the number of class instance present
+        Usage: count <class> or <class>.count()
+        """
+        store = storage.all()
+        if cmmd:
+            args = cmmd.split(" ")
+            if len(args) == 1:
+                count = 0
+                for k in store.keys():
+                    if k.split('.')[0] == args[0]:
+                        count += 1
+                print(count)
+
     def do_EOF(self, line):
         """
         Handles end of file or quit
         """
         return True
-    
+
     def do_quit(self, line):
         """Quits command to exit the program
         Usage: Quit
         """
         return True
-    
-    def emptyline(self, line):
+
+    def emptyline(self):
         """Do nothing on empty input line"""
         pass
 
-if __name__ == '__main__':
-    try:       
-        HBNBCommand().cmdloop()
-    except KeyboardInterrupt:
-        pass
+    def cmdloop(self, intro=None):
+        while True:
+            try:
+                super(HBNBCommand, self).cmdloop(intro)
+                break
+            except KeyboardInterrupt:
+                return True
+
+
+if __name__ == "__main__":
+    HBNBCommand().cmdloop()
