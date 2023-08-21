@@ -1,15 +1,8 @@
 header {
-    background: white;
+    background: white url('/images/logo.png') no-repeat;
+    background-position: calc(30px);
     height: 70px;
     width: 100%;
     border-bottom: 1px #CCCCCC solid;
     display: flex;
-}
-
-header div.logo {
-    background: #000;
-    width: 80px;
-    height: 60px;
-    align-self: center;
-    margin-left: 1rem;
 }
