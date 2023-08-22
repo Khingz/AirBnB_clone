@@ -3,12 +3,11 @@
 }
 
 .places .places-articles {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, 50%);
+    display: flex;
+    flex-wrap: wrap;
     justify-content: center;
-    justify-items: center;
-    align-items: center;
     text-align: center;
+
 }
 
 .places-articles article  {

@@ -30,7 +30,7 @@
 .filter .locations, .filter .amenities {
     height: 100%;
     width: 25%;
-    
+    z-index: 4;
 }
 
 .filter .locations {
@@ -81,4 +81,27 @@
 
 .locations:hover .popover, .amenities:hover .popover {
     display: block;
+}
+
+@media only screen and (max-width: 610px) {
+    .container .filter {
+        background-color: #fff;
+        height: 55px;
+        width: 95%;
+        margin: auto;
+    }
+    .filter button {
+        font-size: 10px;
+        height: 28px;
+        width: 20%;
+    }
+    .filter .locations h3, .filter .amenities h3 {
+        font-size: 13px;
+        margin-left: 1.3rem;
+        margin-top: 0.5rem;
+    }
+    .filter .locations h4, .filter .amenities h4 {
+        font-size: 11px;
+        margin-left: 1.3rem;
+    }
 }
